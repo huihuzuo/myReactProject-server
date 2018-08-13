@@ -1,10 +1,10 @@
 const express = require('express');
+const md5=require("blueimp-md5");
 const router = express.Router();
-const UserModel=require("../db/models");
-const filter={password:0};
+const UserModel=require("../db/models").UserModel;
+const filter={password:0};//查询时过滤出指定的属性
 
 
-/* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
@@ -19,6 +19,8 @@ e)注册成功返回: {code: 0, data: {_id: 'abc', username: ‘xxx’, password
     f)注册失败返回: {code: 1, msg: '此用户已存在'}
 */
 
+
+//注册路由
 router.post("/register",function(req,res){
      const {username,password,type}=req.body;
     UserModel.findOne({username},function(err,user){
@@ -53,7 +55,7 @@ router.post('/login', function (req, res) {
             res.send({code: 0, data: user}) // user中没有pwd
         }
     })
-})
+});
 
 
 module.exports = router;

@@ -31,7 +31,7 @@ const userSchema = mongoose.Schema({
 })
 
 //定义model（与集合对应，可以操作集合）
-const UserModel=mongoose.model("user",userSchema)
+const UserModel=mongoose.model("user",userSchema);
 
 //向外暴露Model
 exports.UserModel=UserModel;
