@@ -20,7 +20,7 @@ e)注册成功返回: {code: 0, data: {_id: 'abc', username: ‘xxx’, password
 */
 
 
-//注册路由
+//1 注册路由
 router.post("/register",function(req,res){
      const {username,password,type}=req.body;
     UserModel.findOne({username},function(err,user){
@@ -37,8 +37,7 @@ router.post("/register",function(req,res){
 
 });
 
-
-// 登陆路由
+// 2 登陆路由
 router.post('/login', function (req, res) {
     // 1. 获取请求参数数据(username, password)
     const {username, password} = req.body
@@ -56,6 +55,47 @@ router.post('/login', function (req, res) {
         }
     })
 });
+
+// 3 更新用户路由
+router.post('/update', function (req, res) {
+  // 得到请求cookie的userid
+  const userid = req.cookies.userid
+  if(!userid) {// 如果没有, 说明没有登陆, 直接返回提示
+    return res.send({code: 1, msg: '请先登陆'});
+}
+
+// 更新数据库中对应的数据
+UserModel.findByIdAndUpdate({_id: userid}, req.body, function (err, user) {// user是数据库中原来的数据
+  const {_id, username, type} = user;
+  // node端 ...不可用三点运算符
+  // const data = {...req.body, _id, username, type}
+  // 合并用户信息
+  const data = Object.assign(req.body, {_id, username, type})
+  // assign(obj1, obj2, obj3,...) // 将多个指定的对象进行合并, 返回一个合并后的对象
+  res.send({code: 0, data})
+})
+})
+
+// 同步接收用户
+const receiveUser = (user) => ({type: RECEIVE_USER, data: user})
+// 同步重置用户
+export const resetUser = (msg) => ({type: RESET_USER, data: msg})
+
+/*
+异步更新用户
+ */
+export const updateUser = (user) => {
+  return async dispatch => {
+    // 发送异步ajax请求
+    const response = await reqUpdateUser(user)
+    const result = response.data
+    if (result.code === 0) { // 更新成功
+      dispatch(receiveUser(result.data))
+    } else { // 失败
+      dispatch(resetUser(result.msg))
+    }
+  }
+}
 
 module.exports = router;
 
